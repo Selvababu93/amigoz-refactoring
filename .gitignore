@@ -1,0 +1,102 @@
+# =========================
+
+# 🖥️ OS Files
+
+# =========================
+
+.DS_Store
+Thumbs.db
+*.db
+# =========================
+
+# 🐍 Python / FastAPI
+
+# =========================
+
+**pycache**/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+
+.venv/
+venv/
+server/.venv/
+
+# Environment variables
+
+.env
+*.env
+
+# Packaging
+
+*.egg-info/
+dist/
+build/
+
+# Caches
+
+.mypy_cache/
+.pytest_cache/
+.cache/
+
+# =========================
+
+# 📱 Flutter / Dart
+
+# =========================
+
+# Build outputs
+
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+.packages
+
+# Generated files
+
+flutter/ephemeral/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Android
+
+android/.gradle/
+android/app/build/
+
+# iOS
+
+ios/Pods/
+ios/.symlinks/
+
+
+# =========================
+
+# 🧰 IDE / Editor
+
+# =========================
+
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# =========================
+
+# 🪵 Logs
+
+# =========================
+
+*.log
+
+# =========================
+
+# 🐳 Docker (optional)
+
+# =========================
+
+*.pid
