@@ -5,7 +5,7 @@ import 'package:drift/drift.dart';
 class OrderItemsTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get orderId => text()();
-  TextColumn get productId => text()();
+  IntColumn get productId => integer()();
   IntColumn get quantity => integer()();
   RealColumn get price => real()();
 }

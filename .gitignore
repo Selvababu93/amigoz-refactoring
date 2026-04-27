@@ -1,102 +1,48 @@
-# =========================
-
-# 🖥️ OS Files
-
-# =========================
-
+# --- OS & IDE ---
 .DS_Store
 Thumbs.db
-*.db
-# =========================
-
-# 🐍 Python / FastAPI
-
-# =========================
-
-**pycache**/
-*.py[cod]
-*.pyo
-*.pyd
-
-# Virtual environments
-
-.venv/
-venv/
-server/.venv/
-
-# Environment variables
-
-.env
-*.env
-
-# Packaging
-
-*.egg-info/
-dist/
-build/
-
-# Caches
-
-.mypy_cache/
-.pytest_cache/
-.cache/
-
-# =========================
-
-# 📱 Flutter / Dart
-
-# =========================
-
-# Build outputs
-
-build/
-.flutter-plugins
-.flutter-plugins-dependencies
-.dart_tool/
-.packages
-
-# Generated files
-
-flutter/ephemeral/
-ios/Flutter/Flutter.framework
-ios/Flutter/Flutter.podspec
-
-# Android
-
-android/.gradle/
-android/app/build/
-
-# iOS
-
-ios/Pods/
-ios/.symlinks/
-
-
-# =========================
-
-# 🧰 IDE / Editor
-
-# =========================
-
 .vscode/
 .idea/
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+*.swp
 
-# =========================
+# --- Secrets ---
+.env
+*.env
+*.pem
+*.key
 
-# 🪵 Logs
+# --- Python / FastAPI ---
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+# Keep your 'static' folder but ignore the uploaded/processed images
+backend/static/processed/*
 
-# =========================
+# --- Flutter (Mobile & Web) ---
+# We ignore the local build folders to ensure Docker builds fresh
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+# Specific path to avoid blocking backend folders
+client/build/
+client/.dart_tool/
+android/
+ios/
 
+# --- React / Vite (Frontend) ---
+# If your portfolio is in a 'frontend' folder:
+frontend/node_modules/
+# IMPORTANT: Do NOT ignore the final 'dist' folder if you build
+# outside Docker and then COPY it in.
+# If you build INSIDE Docker, ignore it:
+# frontend/dist/
+
+# --- Docker ---
+Dockerfile
+docker-compose.yml
 *.log
-
-# =========================
-
-# 🐳 Docker (optional)
-
-# =========================
-
 *.pid

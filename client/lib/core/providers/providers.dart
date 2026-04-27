@@ -3,7 +3,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'providers.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 AppDatabase appDatabase(Ref ref) {
-  return AppDatabase();
+  final db = AppDatabase();
+  ref.onDispose(() {
+    db.close();
+  });
+  return db;
 }

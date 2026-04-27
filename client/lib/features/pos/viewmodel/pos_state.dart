@@ -4,13 +4,30 @@ import 'package:client/features/pos/model/product.dart';
 class PosState {
   final List<Product> products;
   final List<CartItem> cart;
+  final bool loading;
+  final double totalSales;
+  final int totalTransactions;
 
-  const PosState({this.products = const [], this.cart = const []});
+  const PosState(
+      {this.products = const [],
+      this.cart = const [],
+      this.loading = true,
+      this.totalSales = 0,
+      this.totalTransactions = 0});
 
   double get total => cart.fold(0, (sum, item) => sum + item.total);
 
-  PosState copyWith({List<Product>? products, List<CartItem>? cart}) {
+  PosState copyWith(
+      {List<Product>? products,
+      List<CartItem>? cart,
+      bool? loading,
+      double? totalSales,
+      int? totalTransactions}) {
     return PosState(
-        products: products ?? this.products, cart: cart ?? this.cart);
+        products: products ?? this.products,
+        cart: cart ?? this.cart,
+        loading: loading ?? this.loading,
+        totalSales: totalSales ?? this.totalSales,
+        totalTransactions: totalTransactions ?? this.totalTransactions);
   }
 }

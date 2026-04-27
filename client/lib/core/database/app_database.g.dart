@@ -11,9 +11,13 @@ class $ProductsTableTable extends ProductsTable
   $ProductsTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -45,8 +49,6 @@ class $ProductsTableTable extends ProductsTable
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -74,7 +76,7 @@ class $ProductsTableTable extends ProductsTable
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ProductsTableData(
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
       price: attachedDatabase.typeMapping
@@ -92,7 +94,7 @@ class $ProductsTableTable extends ProductsTable
 
 class ProductsTableData extends DataClass
     implements Insertable<ProductsTableData> {
-  final String id;
+  final int id;
   final String name;
   final double price;
   final int stock;
@@ -104,7 +106,7 @@ class ProductsTableData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
+    map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['price'] = Variable<double>(price);
     map['stock'] = Variable<int>(stock);
@@ -124,7 +126,7 @@ class ProductsTableData extends DataClass
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ProductsTableData(
-      id: serializer.fromJson<String>(json['id']),
+      id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       price: serializer.fromJson<double>(json['price']),
       stock: serializer.fromJson<int>(json['stock']),
@@ -134,7 +136,7 @@ class ProductsTableData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
+      'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'price': serializer.toJson<double>(price),
       'stock': serializer.toJson<int>(stock),
@@ -142,7 +144,7 @@ class ProductsTableData extends DataClass
   }
 
   ProductsTableData copyWith(
-          {String? id, String? name, double? price, int? stock}) =>
+          {int? id, String? name, double? price, int? stock}) =>
       ProductsTableData(
         id: id ?? this.id,
         name: name ?? this.name,
@@ -182,55 +184,47 @@ class ProductsTableData extends DataClass
 }
 
 class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
-  final Value<String> id;
+  final Value<int> id;
   final Value<String> name;
   final Value<double> price;
   final Value<int> stock;
-  final Value<int> rowid;
   const ProductsTableCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.price = const Value.absent(),
     this.stock = const Value.absent(),
-    this.rowid = const Value.absent(),
   });
   ProductsTableCompanion.insert({
-    required String id,
+    this.id = const Value.absent(),
     required String name,
     required double price,
     this.stock = const Value.absent(),
-    this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        name = Value(name),
+  })  : name = Value(name),
         price = Value(price);
   static Insertable<ProductsTableData> custom({
-    Expression<String>? id,
+    Expression<int>? id,
     Expression<String>? name,
     Expression<double>? price,
     Expression<int>? stock,
-    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (price != null) 'price': price,
       if (stock != null) 'stock': stock,
-      if (rowid != null) 'rowid': rowid,
     });
   }
 
   ProductsTableCompanion copyWith(
-      {Value<String>? id,
+      {Value<int>? id,
       Value<String>? name,
       Value<double>? price,
-      Value<int>? stock,
-      Value<int>? rowid}) {
+      Value<int>? stock}) {
     return ProductsTableCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       price: price ?? this.price,
       stock: stock ?? this.stock,
-      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -238,7 +232,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value);
+      map['id'] = Variable<int>(id.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -249,9 +243,6 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
     if (stock.present) {
       map['stock'] = Variable<int>(stock.value);
     }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
     return map;
   }
 
@@ -261,8 +252,7 @@ class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('price: $price, ')
-          ..write('stock: $stock, ')
-          ..write('rowid: $rowid')
+          ..write('stock: $stock')
           ..write(')'))
         .toString();
   }
@@ -559,9 +549,9 @@ class $OrderItemsTableTable extends OrderItemsTable
   static const VerificationMeta _productIdMeta =
       const VerificationMeta('productId');
   @override
-  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> productId = GeneratedColumn<int>(
       'product_id', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _quantityMeta =
       const VerificationMeta('quantity');
   @override
@@ -628,7 +618,7 @@ class $OrderItemsTableTable extends OrderItemsTable
       orderId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}order_id'])!,
       productId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}product_id'])!,
       quantity: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}quantity'])!,
       price: attachedDatabase.typeMapping
@@ -646,7 +636,7 @@ class OrderItemsTableData extends DataClass
     implements Insertable<OrderItemsTableData> {
   final int id;
   final String orderId;
-  final String productId;
+  final int productId;
   final int quantity;
   final double price;
   const OrderItemsTableData(
@@ -660,7 +650,7 @@ class OrderItemsTableData extends DataClass
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['order_id'] = Variable<String>(orderId);
-    map['product_id'] = Variable<String>(productId);
+    map['product_id'] = Variable<int>(productId);
     map['quantity'] = Variable<int>(quantity);
     map['price'] = Variable<double>(price);
     return map;
@@ -682,7 +672,7 @@ class OrderItemsTableData extends DataClass
     return OrderItemsTableData(
       id: serializer.fromJson<int>(json['id']),
       orderId: serializer.fromJson<String>(json['orderId']),
-      productId: serializer.fromJson<String>(json['productId']),
+      productId: serializer.fromJson<int>(json['productId']),
       quantity: serializer.fromJson<int>(json['quantity']),
       price: serializer.fromJson<double>(json['price']),
     );
@@ -693,7 +683,7 @@ class OrderItemsTableData extends DataClass
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'orderId': serializer.toJson<String>(orderId),
-      'productId': serializer.toJson<String>(productId),
+      'productId': serializer.toJson<int>(productId),
       'quantity': serializer.toJson<int>(quantity),
       'price': serializer.toJson<double>(price),
     };
@@ -702,7 +692,7 @@ class OrderItemsTableData extends DataClass
   OrderItemsTableData copyWith(
           {int? id,
           String? orderId,
-          String? productId,
+          int? productId,
           int? quantity,
           double? price}) =>
       OrderItemsTableData(
@@ -750,7 +740,7 @@ class OrderItemsTableData extends DataClass
 class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
   final Value<int> id;
   final Value<String> orderId;
-  final Value<String> productId;
+  final Value<int> productId;
   final Value<int> quantity;
   final Value<double> price;
   const OrderItemsTableCompanion({
@@ -763,7 +753,7 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
   OrderItemsTableCompanion.insert({
     this.id = const Value.absent(),
     required String orderId,
-    required String productId,
+    required int productId,
     required int quantity,
     required double price,
   })  : orderId = Value(orderId),
@@ -773,7 +763,7 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
   static Insertable<OrderItemsTableData> custom({
     Expression<int>? id,
     Expression<String>? orderId,
-    Expression<String>? productId,
+    Expression<int>? productId,
     Expression<int>? quantity,
     Expression<double>? price,
   }) {
@@ -789,7 +779,7 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
   OrderItemsTableCompanion copyWith(
       {Value<int>? id,
       Value<String>? orderId,
-      Value<String>? productId,
+      Value<int>? productId,
       Value<int>? quantity,
       Value<double>? price}) {
     return OrderItemsTableCompanion(
@@ -811,7 +801,7 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
       map['order_id'] = Variable<String>(orderId.value);
     }
     if (productId.present) {
-      map['product_id'] = Variable<String>(productId.value);
+      map['product_id'] = Variable<int>(productId.value);
     }
     if (quantity.present) {
       map['quantity'] = Variable<int>(quantity.value);
@@ -835,6 +825,386 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
   }
 }
 
+class $ShopTableTable extends ShopTable
+    with TableInfo<$ShopTableTable, ShopTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShopTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+      'city', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+      'state', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _countryMeta =
+      const VerificationMeta('country');
+  @override
+  late final GeneratedColumn<String> country = GeneratedColumn<String>(
+      'country', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _mobileMeta = const VerificationMeta('mobile');
+  @override
+  late final GeneratedColumn<String> mobile = GeneratedColumn<String>(
+      'mobile', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _currencyMeta =
+      const VerificationMeta('currency');
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+      'currency', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, city, state, country, mobile, currency];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shop_table';
+  @override
+  VerificationContext validateIntegrity(Insertable<ShopTableData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+          _cityMeta, city.isAcceptableOrUnknown(data['city']!, _cityMeta));
+    } else if (isInserting) {
+      context.missing(_cityMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('country')) {
+      context.handle(_countryMeta,
+          country.isAcceptableOrUnknown(data['country']!, _countryMeta));
+    } else if (isInserting) {
+      context.missing(_countryMeta);
+    }
+    if (data.containsKey('mobile')) {
+      context.handle(_mobileMeta,
+          mobile.isAcceptableOrUnknown(data['mobile']!, _mobileMeta));
+    } else if (isInserting) {
+      context.missing(_mobileMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(_currencyMeta,
+          currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta));
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => const {};
+  @override
+  ShopTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShopTableData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      city: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}city'])!,
+      state: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}state'])!,
+      country: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}country'])!,
+      mobile: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mobile'])!,
+      currency: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}currency'])!,
+    );
+  }
+
+  @override
+  $ShopTableTable createAlias(String alias) {
+    return $ShopTableTable(attachedDatabase, alias);
+  }
+}
+
+class ShopTableData extends DataClass implements Insertable<ShopTableData> {
+  final String id;
+  final String name;
+  final String city;
+  final String state;
+  final String country;
+  final String mobile;
+  final String currency;
+  const ShopTableData(
+      {required this.id,
+      required this.name,
+      required this.city,
+      required this.state,
+      required this.country,
+      required this.mobile,
+      required this.currency});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['city'] = Variable<String>(city);
+    map['state'] = Variable<String>(state);
+    map['country'] = Variable<String>(country);
+    map['mobile'] = Variable<String>(mobile);
+    map['currency'] = Variable<String>(currency);
+    return map;
+  }
+
+  ShopTableCompanion toCompanion(bool nullToAbsent) {
+    return ShopTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      city: Value(city),
+      state: Value(state),
+      country: Value(country),
+      mobile: Value(mobile),
+      currency: Value(currency),
+    );
+  }
+
+  factory ShopTableData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShopTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      city: serializer.fromJson<String>(json['city']),
+      state: serializer.fromJson<String>(json['state']),
+      country: serializer.fromJson<String>(json['country']),
+      mobile: serializer.fromJson<String>(json['mobile']),
+      currency: serializer.fromJson<String>(json['currency']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'city': serializer.toJson<String>(city),
+      'state': serializer.toJson<String>(state),
+      'country': serializer.toJson<String>(country),
+      'mobile': serializer.toJson<String>(mobile),
+      'currency': serializer.toJson<String>(currency),
+    };
+  }
+
+  ShopTableData copyWith(
+          {String? id,
+          String? name,
+          String? city,
+          String? state,
+          String? country,
+          String? mobile,
+          String? currency}) =>
+      ShopTableData(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        city: city ?? this.city,
+        state: state ?? this.state,
+        country: country ?? this.country,
+        mobile: mobile ?? this.mobile,
+        currency: currency ?? this.currency,
+      );
+  ShopTableData copyWithCompanion(ShopTableCompanion data) {
+    return ShopTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      city: data.city.present ? data.city.value : this.city,
+      state: data.state.present ? data.state.value : this.state,
+      country: data.country.present ? data.country.value : this.country,
+      mobile: data.mobile.present ? data.mobile.value : this.mobile,
+      currency: data.currency.present ? data.currency.value : this.currency,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShopTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('city: $city, ')
+          ..write('state: $state, ')
+          ..write('country: $country, ')
+          ..write('mobile: $mobile, ')
+          ..write('currency: $currency')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, city, state, country, mobile, currency);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShopTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.city == this.city &&
+          other.state == this.state &&
+          other.country == this.country &&
+          other.mobile == this.mobile &&
+          other.currency == this.currency);
+}
+
+class ShopTableCompanion extends UpdateCompanion<ShopTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> city;
+  final Value<String> state;
+  final Value<String> country;
+  final Value<String> mobile;
+  final Value<String> currency;
+  final Value<int> rowid;
+  const ShopTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.city = const Value.absent(),
+    this.state = const Value.absent(),
+    this.country = const Value.absent(),
+    this.mobile = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShopTableCompanion.insert({
+    required String id,
+    required String name,
+    required String city,
+    required String state,
+    required String country,
+    required String mobile,
+    required String currency,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        name = Value(name),
+        city = Value(city),
+        state = Value(state),
+        country = Value(country),
+        mobile = Value(mobile),
+        currency = Value(currency);
+  static Insertable<ShopTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? city,
+    Expression<String>? state,
+    Expression<String>? country,
+    Expression<String>? mobile,
+    Expression<String>? currency,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (city != null) 'city': city,
+      if (state != null) 'state': state,
+      if (country != null) 'country': country,
+      if (mobile != null) 'mobile': mobile,
+      if (currency != null) 'currency': currency,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShopTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? name,
+      Value<String>? city,
+      Value<String>? state,
+      Value<String>? country,
+      Value<String>? mobile,
+      Value<String>? currency,
+      Value<int>? rowid}) {
+    return ShopTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      country: country ?? this.country,
+      mobile: mobile ?? this.mobile,
+      currency: currency ?? this.currency,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (country.present) {
+      map['country'] = Variable<String>(country.value);
+    }
+    if (mobile.present) {
+      map['mobile'] = Variable<String>(mobile.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShopTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('city: $city, ')
+          ..write('state: $state, ')
+          ..write('country: $country, ')
+          ..write('mobile: $mobile, ')
+          ..write('currency: $currency, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -842,6 +1212,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OrdersTableTable ordersTable = $OrdersTableTable(this);
   late final $OrderItemsTableTable orderItemsTable =
       $OrderItemsTableTable(this);
+  late final $ShopTableTable shopTable = $ShopTableTable(this);
   late final Index orderItemsOrderId = Index('order_items_order_id',
       'CREATE INDEX order_items_order_id ON order_items_table (order_id)');
   late final Index orderItemsProductId = Index('order_items_product_id',
@@ -854,6 +1225,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         productsTable,
         ordersTable,
         orderItemsTable,
+        shopTable,
         orderItemsOrderId,
         orderItemsProductId
       ];
@@ -861,19 +1233,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 
 typedef $$ProductsTableTableCreateCompanionBuilder = ProductsTableCompanion
     Function({
-  required String id,
+  Value<int> id,
   required String name,
   required double price,
   Value<int> stock,
-  Value<int> rowid,
 });
 typedef $$ProductsTableTableUpdateCompanionBuilder = ProductsTableCompanion
     Function({
-  Value<String> id,
+  Value<int> id,
   Value<String> name,
   Value<double> price,
   Value<int> stock,
-  Value<int> rowid,
 });
 
 class $$ProductsTableTableFilterComposer
@@ -885,7 +1255,7 @@ class $$ProductsTableTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
+  ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get name => $composableBuilder(
@@ -907,7 +1277,7 @@ class $$ProductsTableTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
+  ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get name => $composableBuilder(
@@ -929,7 +1299,7 @@ class $$ProductsTableTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
+  GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
@@ -968,32 +1338,28 @@ class $$ProductsTableTableTableManager extends RootTableManager<
           createComputedFieldComposer: () =>
               $$ProductsTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
+            Value<int> id = const Value.absent(),
             Value<String> name = const Value.absent(),
             Value<double> price = const Value.absent(),
             Value<int> stock = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
           }) =>
               ProductsTableCompanion(
             id: id,
             name: name,
             price: price,
             stock: stock,
-            rowid: rowid,
           ),
           createCompanionCallback: ({
-            required String id,
+            Value<int> id = const Value.absent(),
             required String name,
             required double price,
             Value<int> stock = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
           }) =>
               ProductsTableCompanion.insert(
             id: id,
             name: name,
             price: price,
             stock: stock,
-            rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -1179,7 +1545,7 @@ typedef $$OrderItemsTableTableCreateCompanionBuilder = OrderItemsTableCompanion
     Function({
   Value<int> id,
   required String orderId,
-  required String productId,
+  required int productId,
   required int quantity,
   required double price,
 });
@@ -1187,7 +1553,7 @@ typedef $$OrderItemsTableTableUpdateCompanionBuilder = OrderItemsTableCompanion
     Function({
   Value<int> id,
   Value<String> orderId,
-  Value<String> productId,
+  Value<int> productId,
   Value<int> quantity,
   Value<double> price,
 });
@@ -1207,7 +1573,7 @@ class $$OrderItemsTableTableFilterComposer
   ColumnFilters<String> get orderId => $composableBuilder(
       column: $table.orderId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get productId => $composableBuilder(
+  ColumnFilters<int> get productId => $composableBuilder(
       column: $table.productId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get quantity => $composableBuilder(
@@ -1232,7 +1598,7 @@ class $$OrderItemsTableTableOrderingComposer
   ColumnOrderings<String> get orderId => $composableBuilder(
       column: $table.orderId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get productId => $composableBuilder(
+  ColumnOrderings<int> get productId => $composableBuilder(
       column: $table.productId, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get quantity => $composableBuilder(
@@ -1257,7 +1623,7 @@ class $$OrderItemsTableTableAnnotationComposer
   GeneratedColumn<String> get orderId =>
       $composableBuilder(column: $table.orderId, builder: (column) => column);
 
-  GeneratedColumn<String> get productId =>
+  GeneratedColumn<int> get productId =>
       $composableBuilder(column: $table.productId, builder: (column) => column);
 
   GeneratedColumn<int> get quantity =>
@@ -1296,7 +1662,7 @@ class $$OrderItemsTableTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> orderId = const Value.absent(),
-            Value<String> productId = const Value.absent(),
+            Value<int> productId = const Value.absent(),
             Value<int> quantity = const Value.absent(),
             Value<double> price = const Value.absent(),
           }) =>
@@ -1310,7 +1676,7 @@ class $$OrderItemsTableTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String orderId,
-            required String productId,
+            required int productId,
             required int quantity,
             required double price,
           }) =>
@@ -1343,6 +1709,207 @@ typedef $$OrderItemsTableTableProcessedTableManager = ProcessedTableManager<
     ),
     OrderItemsTableData,
     PrefetchHooks Function()>;
+typedef $$ShopTableTableCreateCompanionBuilder = ShopTableCompanion Function({
+  required String id,
+  required String name,
+  required String city,
+  required String state,
+  required String country,
+  required String mobile,
+  required String currency,
+  Value<int> rowid,
+});
+typedef $$ShopTableTableUpdateCompanionBuilder = ShopTableCompanion Function({
+  Value<String> id,
+  Value<String> name,
+  Value<String> city,
+  Value<String> state,
+  Value<String> country,
+  Value<String> mobile,
+  Value<String> currency,
+  Value<int> rowid,
+});
+
+class $$ShopTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ShopTableTable> {
+  $$ShopTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get city => $composableBuilder(
+      column: $table.city, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get state => $composableBuilder(
+      column: $table.state, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get country => $composableBuilder(
+      column: $table.country, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mobile => $composableBuilder(
+      column: $table.mobile, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnFilters(column));
+}
+
+class $$ShopTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShopTableTable> {
+  $$ShopTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get city => $composableBuilder(
+      column: $table.city, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get state => $composableBuilder(
+      column: $table.state, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get country => $composableBuilder(
+      column: $table.country, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mobile => $composableBuilder(
+      column: $table.mobile, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+      column: $table.currency, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ShopTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShopTableTable> {
+  $$ShopTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get country =>
+      $composableBuilder(column: $table.country, builder: (column) => column);
+
+  GeneratedColumn<String> get mobile =>
+      $composableBuilder(column: $table.mobile, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+}
+
+class $$ShopTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ShopTableTable,
+    ShopTableData,
+    $$ShopTableTableFilterComposer,
+    $$ShopTableTableOrderingComposer,
+    $$ShopTableTableAnnotationComposer,
+    $$ShopTableTableCreateCompanionBuilder,
+    $$ShopTableTableUpdateCompanionBuilder,
+    (
+      ShopTableData,
+      BaseReferences<_$AppDatabase, $ShopTableTable, ShopTableData>
+    ),
+    ShopTableData,
+    PrefetchHooks Function()> {
+  $$ShopTableTableTableManager(_$AppDatabase db, $ShopTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShopTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShopTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShopTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> city = const Value.absent(),
+            Value<String> state = const Value.absent(),
+            Value<String> country = const Value.absent(),
+            Value<String> mobile = const Value.absent(),
+            Value<String> currency = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShopTableCompanion(
+            id: id,
+            name: name,
+            city: city,
+            state: state,
+            country: country,
+            mobile: mobile,
+            currency: currency,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String name,
+            required String city,
+            required String state,
+            required String country,
+            required String mobile,
+            required String currency,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              ShopTableCompanion.insert(
+            id: id,
+            name: name,
+            city: city,
+            state: state,
+            country: country,
+            mobile: mobile,
+            currency: currency,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ShopTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ShopTableTable,
+    ShopTableData,
+    $$ShopTableTableFilterComposer,
+    $$ShopTableTableOrderingComposer,
+    $$ShopTableTableAnnotationComposer,
+    $$ShopTableTableCreateCompanionBuilder,
+    $$ShopTableTableUpdateCompanionBuilder,
+    (
+      ShopTableData,
+      BaseReferences<_$AppDatabase, $ShopTableTable, ShopTableData>
+    ),
+    ShopTableData,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1353,4 +1920,6 @@ class $AppDatabaseManager {
       $$OrdersTableTableTableManager(_db, _db.ordersTable);
   $$OrderItemsTableTableTableManager get orderItemsTable =>
       $$OrderItemsTableTableTableManager(_db, _db.orderItemsTable);
+  $$ShopTableTableTableManager get shopTable =>
+      $$ShopTableTableTableManager(_db, _db.shopTable);
 }
