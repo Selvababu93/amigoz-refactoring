@@ -1,149 +1,160 @@
+import 'dart:io';
+
+import 'package:client/features/pos/view/pages/barcode_scanner_page.dart';
 import 'package:client/features/pos/viewmodel/pos_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddProductPage extends ConsumerStatefulWidget {
   const AddProductPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() {
-    return _AddProductPageState();
-  }
+  ConsumerState<AddProductPage> createState() => _AddProductPageState();
 }
 
 class _AddProductPageState extends ConsumerState<AddProductPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _stockController = TextEditingController();
+  final nameCtrl = TextEditingController();
+  final priceCtrl = TextEditingController();
+  final stockCtrl = TextEditingController();
+  final barcodeCtrl = TextEditingController();
 
-  bool _loading = false;
+  int? selectedCategoryId;
+  File? imageFile;
 
-  // Future<void> _submit() async {
-  //   if (!_formKey.currentState!.validate()) return;
-  //   setState(() {
-  //     _loading = true;
-  //   });
+  Future<void> pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-  //   try {
-  //     await ref.read(posRepositoryProvider).addProduct(
-  //           _nameController.text.trim(),
-  //           double.parse(_priceController.text),
-  //           _stockController.text.isEmpty
-  //               ? 0
-  //               : int.parse(_stockController.text),
-  //         );
-  //     if (mounted) {
-  //       Navigator.pop(context);
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context)
-  //         .showSnackBar(SnackBar(content: Text('Error $e')));
-  //   } finally {
-  //     if (mounted) setState(() => _loading = false);
-  //   }
-  // }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _priceController.dispose();
-    _stockController.dispose();
-    super.dispose();
+    if (picked != null) {
+      setState(() {
+        imageFile = File(picked.path);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(posViewModelProvider);
+    final vm = ref.read(posViewModelProvider.notifier);
+
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Add Product"),
+      appBar: AppBar(title: const Text("Add Product")),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            /// 🔹 IMAGE PICKER
+            GestureDetector(
+              onTap: pickImage,
+              child: Container(
+                height: 120,
+                color: Colors.grey[200],
+                child: imageFile == null
+                    ? const Icon(Icons.camera_alt)
+                    : Image.file(imageFile!, fit: BoxFit.cover),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            /// 🔹 NAME
+            TextField(
+              controller: nameCtrl,
+              decoration: const InputDecoration(labelText: "Product Name"),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// 🔹 PRICE
+            TextField(
+              controller: priceCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: "Price"),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// 🔹 STOCK
+            TextField(
+              controller: stockCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: "Stock"),
+            ),
+
+            const SizedBox(height: 12),
+
+            /// 🔹 CATEGORY DROPDOWN
+            DropdownButtonFormField<int>(
+              value: selectedCategoryId,
+              hint: const Text("Select Category"),
+              items: state.categories
+                  .map((c) => DropdownMenuItem(
+                        value: c.id,
+                        child: Text(c.name),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedCategoryId = value;
+                });
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            /// Barcode
+            TextField(
+              controller: barcodeCtrl,
+              decoration: InputDecoration(
+                labelText: "Barcode",
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.qr_code_scanner),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const BarcodeScannerPage(),
+                      ),
+                    );
+
+                    if (result != null) {
+                      setState(() {
+                        barcodeCtrl.text = result;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            /// 🔹 SAVE BUTTON
+            ElevatedButton(
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                final price = double.tryParse(priceCtrl.text) ?? 0;
+                final stock = int.tryParse(stockCtrl.text) ?? 0;
+
+                if (name.isEmpty) return;
+
+                await vm.addProduct(
+                    name: name,
+                    price: price,
+                    stock: stock,
+                    categoryId: selectedCategoryId,
+                    imagePath: imageFile?.path,
+                    barcode: barcodeCtrl.text.trim().isEmpty
+                        ? null
+                        : barcodeCtrl.text.trim());
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Save Product"),
+            )
+          ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // Name
-                  TextFormField(
-                    controller: _nameController,
-                    textInputAction: TextInputAction.next,
-                    decoration:
-                        const InputDecoration(labelText: "Product Name"),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? "Enter name" : null,
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-
-                  // Price
-                  TextFormField(
-                    controller: _priceController,
-                    decoration: const InputDecoration(labelText: "price"),
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    textInputAction: TextInputAction.next,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) return 'Enter Price';
-                      if (double.tryParse(val) == null) return "Invalid Number";
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  //  Stock
-                  TextFormField(
-                    controller: _stockController,
-                    decoration: const InputDecoration(labelText: "Stock"),
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) return "Enter Stock";
-                      if (int.tryParse(val) == null) return "Invalid Number";
-                      return null;
-                    },
-                  ),
-                  const SizedBox(
-                    height: 24,
-                  ),
-
-                  // Submit Button
-
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   child: ElevatedButton(
-                  //       onPressed: _loading ? null : _submit,
-                  //       child: _loading
-                  //           ? const CircularProgressIndicator()
-                  //           : const Text("Add Product")),
-                  // )
-
-                  // ElevatedButton(
-                  //     onPressed: () async {}, child: Text("Add Product")),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          if (!_formKey.currentState!.validate()) return;
-                          await ref
-                              .read(posViewModelProvider.notifier)
-                              .addProduct(
-                                  name: _nameController.text,
-                                  price: double.parse(_priceController.text),
-                                  stock: int.parse(_stockController.text));
-                          Navigator.of(context).pop();
-                        },
-                        child: _loading
-                            ? const CircularProgressIndicator()
-                            : const Text("Add Product")),
-                  )
-                ],
-              )),
-        ));
+      ),
+    );
   }
 }

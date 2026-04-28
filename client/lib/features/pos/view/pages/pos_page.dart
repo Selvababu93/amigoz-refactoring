@@ -1,23 +1,51 @@
-import 'package:client/features/pos/view/pages/add_product_page.dart';
+import 'dart:developer';
+
+import 'package:client/features/pos/view/pages/barcode_scanner_page.dart';
 import 'package:client/features/pos/view/widgets/cart_bar.dart';
 import 'package:client/features/pos/view/widgets/product_grid.dart';
+import 'package:client/features/pos/viewmodel/pos_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PosPage extends StatelessWidget {
+class PosPage extends ConsumerWidget {
   const PosPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final vm = ref.read(posViewModelProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("POS System"),
         actions: [
           IconButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (ctx) => const AddProductPage()));
-              },
-              icon: Icon(Icons.add))
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () async {
+              final barcode = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const BarcodeScannerPage(),
+                ),
+              );
+
+              if (barcode != null && context.mounted) {
+                try {
+                  log("SCAN_START", name: "POS");
+                  print("RAW SCAN INPUT: [$barcode]");
+                  print("CLEAN SCAN INPUT: [${barcode.trim()}]");
+                  await vm.scanAndAddProduct(barcode);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Product added")),
+                  );
+                } catch (_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Product not found")),
+                  );
+                }
+              }
+            },
+          ),
         ],
       ),
       body: const ProductGrid(),

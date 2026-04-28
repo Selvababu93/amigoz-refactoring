@@ -36,17 +36,19 @@ class CartSheet extends ConsumerWidget {
                       trailing: Text("Rupees ${item.total.toStringAsFixed(2)}"),
                     );
                   })),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50)),
-              onPressed: state.cart.isEmpty
-                  ? null
-                  : () {
-                      vm.checkOut(context);
+          SafeArea(
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50)),
+                onPressed: state.cart.isEmpty
+                    ? null
+                    : () {
+                        vm.checkOut(context);
 
-                      Navigator.of(context).pop();
-                    },
-              child: const Text('CHECKOUT'))
+                        Navigator.of(context).pop();
+                      },
+                child: const Text('CHECKOUT')),
+          )
         ],
       ),
     );

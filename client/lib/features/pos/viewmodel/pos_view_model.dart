@@ -27,22 +27,65 @@ class PosViewModel extends _$PosViewModel {
     final repo = ref.read(posRepositoryProvider);
 
     // implement sync products later
+    // testing
+    // await repo.addCategory("Grocerries");
+    // await repo.addCategory("Snacks");
+    // await repo.addCategory("Drinks");
+    // print("Cat Added");
     final products = await repo.getProducts();
     final sales = await repo.getTotalSales();
     final tx = await repo.getTotalTransactions();
+    final categories = await repo.getCategories();
     state = state.copyWith(
         products: products,
         loading: false,
         totalSales: sales,
-        totalTransactions: tx);
+        totalTransactions: tx,
+        selectedCategoryId: null,
+        categories: categories);
   }
 
+  void selectCategory(int? id) {
+    state = state.copyWith(selectedCategoryId: id);
+  }
+
+  List<Product> get filteredProducts {
+    if (state.selectedCategoryId == null) return state.products;
+
+    return state.products
+        .where((p) => p.categoryId == state.selectedCategoryId)
+        .toList();
+  }
+
+// old version
+  // Future<void> addProduct(
+  //     {required String name, required double price, required int stock}) async {
+  //   final repo = ref.read(posRepositoryProvider);
+  //   await repo.addProduct(name: name, price: price, stock: stock);
+  //   // refresh list
+  //   final products = await repo.getProducts();
+  //   state = state.copyWith(products: products);
+  // }
   Future<void> addProduct(
-      {required String name, required double price, required int stock}) async {
+      {required String name,
+      required double price,
+      required int stock,
+      int? categoryId,
+      String? imagePath,
+      String? barcode}) async {
     final repo = ref.read(posRepositoryProvider);
-    await repo.addProduct(name: name, price: price, stock: stock);
-    // refresh list
+
+    await repo.addProduct(
+        name: name,
+        price: price,
+        stock: stock,
+        categoryId: categoryId,
+        imagePath: imagePath,
+        barcode: barcode);
+
+    // reload products
     final products = await repo.getProducts();
+
     state = state.copyWith(products: products);
   }
 
@@ -85,6 +128,7 @@ class PosViewModel extends _$PosViewModel {
       await repo.updateStock(item.productId, item.quantity);
     }
     final products = await repo.getProducts();
+
     await loadAnalytics();
     await repo.createOrder(id, state.total, items);
     final invoice = generateInVoice(id);
@@ -133,6 +177,28 @@ class PosViewModel extends _$PosViewModel {
         .toList();
 
     state = state.copyWith(products: filtered);
+  }
+
+  bool _isAdding = false;
+
+  Future<void> scanAndAddProduct(String barcode) async {
+    if (_isAdding) return;
+
+    _isAdding = true;
+
+    try {
+      final repo = ref.read(posRepositoryProvider);
+
+      final product = await repo.getProductByBarcode(barcode);
+
+      if (product != null) {
+        addToCart(product);
+      } else {
+        print("PRODUCT NOT FOUND: $barcode");
+      }
+    } finally {
+      _isAdding = false;
+    }
   }
 
   Future<void> loadAnalytics() async {
