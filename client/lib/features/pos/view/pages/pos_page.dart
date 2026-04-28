@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:client/features/pos/view/pages/barcode_scanner_page.dart';
 import 'package:client/features/pos/view/widgets/cart_bar.dart';
 import 'package:client/features/pos/view/widgets/product_grid.dart';
@@ -22,25 +20,25 @@ class PosPage extends ConsumerWidget {
             icon: const Icon(Icons.qr_code_scanner),
             onPressed: () async {
               final barcode = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const BarcodeScannerPage(),
-                ),
-              );
+                  context,
+                  MaterialPageRoute(
+                      builder: (ctx) => const BarcodeScannerPage()));
 
               if (barcode != null && context.mounted) {
-                try {
-                  log("SCAN_START", name: "POS");
-                  print("RAW SCAN INPUT: [$barcode]");
-                  print("CLEAN SCAN INPUT: [${barcode.trim()}]");
-                  await vm.scanAndAddProduct(barcode);
+                final cleanBarcode = barcode.trim();
 
+                // ✅ Read FRESH notifier here, not from build
+                final success = await ref
+                    .read(posViewModelProvider.notifier)
+                    .scanAndAddProduct(cleanBarcode);
+
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Product added")),
-                  );
-                } catch (_) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Product not found")),
+                    SnackBar(
+                      content:
+                          Text(success ? "Product added" : "Product not found"),
+                      backgroundColor: success ? Colors.green : Colors.red,
+                    ),
                   );
                 }
               }

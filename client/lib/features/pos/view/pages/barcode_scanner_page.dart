@@ -11,6 +11,11 @@ class BarcodeScannerPage extends StatefulWidget {
 class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
   bool _isProcessing = false;
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _onDetect(BarcodeCapture capture) {
     if (_isProcessing) return;
 

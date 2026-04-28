@@ -679,7 +679,9 @@ class $OrderItemsTableTable extends OrderItemsTable
   @override
   late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
       'quantity', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(1));
   static const VerificationMeta _priceMeta = const VerificationMeta('price');
   @override
   late final GeneratedColumn<double> price = GeneratedColumn<double>(
@@ -717,8 +719,6 @@ class $OrderItemsTableTable extends OrderItemsTable
     if (data.containsKey('quantity')) {
       context.handle(_quantityMeta,
           quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
-    } else if (isInserting) {
-      context.missing(_quantityMeta);
     }
     if (data.containsKey('price')) {
       context.handle(
@@ -731,6 +731,10 @@ class $OrderItemsTableTable extends OrderItemsTable
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {orderId, productId},
+      ];
   @override
   OrderItemsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -876,11 +880,10 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
     this.id = const Value.absent(),
     required String orderId,
     required int productId,
-    required int quantity,
+    this.quantity = const Value.absent(),
     required double price,
   })  : orderId = Value(orderId),
         productId = Value(productId),
-        quantity = Value(quantity),
         price = Value(price);
   static Insertable<OrderItemsTableData> custom({
     Expression<int>? id,
@@ -1897,7 +1900,7 @@ typedef $$OrderItemsTableTableCreateCompanionBuilder = OrderItemsTableCompanion
   Value<int> id,
   required String orderId,
   required int productId,
-  required int quantity,
+  Value<int> quantity,
   required double price,
 });
 typedef $$OrderItemsTableTableUpdateCompanionBuilder = OrderItemsTableCompanion
@@ -2028,7 +2031,7 @@ class $$OrderItemsTableTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             required String orderId,
             required int productId,
-            required int quantity,
+            Value<int> quantity = const Value.absent(),
             required double price,
           }) =>
               OrderItemsTableCompanion.insert(

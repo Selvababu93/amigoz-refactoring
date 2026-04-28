@@ -41,7 +41,7 @@ final class PosViewModelProvider
   }
 }
 
-String _$posViewModelHash() => r'ed981dfa95444aa0b573a160378800c99c836792';
+String _$posViewModelHash() => r'13280916b80a2dc6b8075263b75ea0e04a5b7fee';
 
 abstract class _$PosViewModel extends $Notifier<PosState> {
   PosState build();

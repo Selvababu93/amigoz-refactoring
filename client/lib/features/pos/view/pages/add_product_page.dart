@@ -33,6 +33,15 @@ class _AddProductPageState extends ConsumerState<AddProductPage> {
   }
 
   @override
+  void dispose() {
+    nameCtrl.dispose();
+    priceCtrl.dispose();
+    stockCtrl.dispose();
+    barcodeCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = ref.watch(posViewModelProvider);
     final vm = ref.read(posViewModelProvider.notifier);

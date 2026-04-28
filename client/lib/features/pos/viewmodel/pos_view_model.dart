@@ -5,6 +5,7 @@ import 'package:client/features/pos/model/invoice_model.dart';
 import 'package:client/features/pos/model/product.dart';
 import 'package:client/features/pos/repository/pos_repository.dart';
 import 'package:client/features/pos/viewmodel/pos_state.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -99,13 +100,22 @@ class PosViewModel extends _$PosViewModel {
 
   void addToCart(Product product) {
     final cart = [...state.cart];
+
+    // Use product.id to find the item
     final i = cart.indexWhere((e) => e.product.id == product.id);
 
     if (i != -1) {
-      cart[i] = cart[i].copyWith(quantity: cart[i].quantity + 1);
+      // SECOND SCAN FIX: Use ?? 0 so you don't add 1 to a null value
+      final currentQty = cart[i].quantity ?? 0;
+      cart[i] = cart[i].copyWith(quantity: currentQty + 1);
     } else {
+      // FIRST SCAN FIX: You MUST pass quantity: 1 here
       cart.add(CartItem(
-          product: product, price: product.price, productId: product.id));
+        product: product,
+        price: product.price,
+        productId: product.id,
+        quantity: 1, // <--- IMPORTANT: Do not leave this out
+      ));
     }
 
     state = state.copyWith(cart: cart);
@@ -121,7 +131,7 @@ class PosViewModel extends _$PosViewModel {
       return OrderItemsTableCompanion.insert(
           orderId: id,
           productId: e.productId,
-          quantity: e.quantity,
+          quantity: Value(e.quantity),
           price: e.price);
     }).toList();
     for (final item in state.cart) {
@@ -181,21 +191,24 @@ class PosViewModel extends _$PosViewModel {
 
   bool _isAdding = false;
 
-  Future<void> scanAndAddProduct(String barcode) async {
-    if (_isAdding) return;
+  Future<bool> scanAndAddProduct(String barcode) async {
+    debugPrint("_isAdding is: $_isAdding"); // <-- add this
 
+    if (_isAdding) return false;
     _isAdding = true;
 
     try {
       final repo = ref.read(posRepositoryProvider);
-
       final product = await repo.getProductByBarcode(barcode);
 
       if (product != null) {
         addToCart(product);
-      } else {
-        print("PRODUCT NOT FOUND: $barcode");
+        return true; // <--- THIS IS KEY
       }
+      return false; // <--- AND THIS
+    } catch (e) {
+      debugPrint("Scan Error: $e");
+      return false;
     } finally {
       _isAdding = false;
     }
