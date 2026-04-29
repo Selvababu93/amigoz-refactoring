@@ -1,5 +1,5 @@
-import 'package:client/features/pos/view/widgets/cart_sheet.dart';
-import 'package:client/features/pos/viewmodel/pos_view_model.dart';
+import 'package:amigoz/features/pos/view/widgets/cart_sheet.dart';
+import 'package:amigoz/features/pos/viewmodel/pos_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

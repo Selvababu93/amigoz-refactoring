@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:client/core/database/app_database.dart';
-import 'package:client/core/providers/providers.dart';
+import 'package:amigoz/core/database/app_database.dart';
+import 'package:amigoz/core/providers/providers.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

@@ -1,6 +1,6 @@
 enum ReportFilter {
   today,
-  yesterday,
+  // yesterday,
   thisWeek,
   thisMonth,
   lastMonth,

@@ -1,7 +1,7 @@
-import 'package:client/features/pos/view/pages/analytics_page.dart';
-import 'package:client/features/pos/view/pages/pos_page.dart';
-import 'package:client/features/pos/view/pages/products_page.dart';
-import 'package:client/features/pos/view/pages/today_report_page.dart';
+import 'package:amigoz/features/pos/view/pages/analytics_page.dart';
+import 'package:amigoz/features/pos/view/pages/pos_page.dart';
+import 'package:amigoz/features/pos/view/pages/products_page.dart';
+import 'package:amigoz/features/pos/view/pages/today_report_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {

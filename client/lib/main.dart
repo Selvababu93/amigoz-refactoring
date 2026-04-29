@@ -1,6 +1,6 @@
-import 'package:client/core/providers/providers.dart';
-import 'package:client/features/pos/view/pages/home_page.dart';
-import 'package:client/features/setup/view/pages/setup_page.dart';
+import 'package:amigoz/core/providers/providers.dart';
+import 'package:amigoz/features/pos/view/pages/home_page.dart';
+import 'package:amigoz/features/setup/view/pages/setup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

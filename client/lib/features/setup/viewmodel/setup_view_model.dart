@@ -1,5 +1,5 @@
-import 'package:client/features/setup/repository/setup_repository.dart';
-import 'package:client/features/setup/viewmodel/setup_state.dart';
+import 'package:amigoz/features/setup/repository/setup_repository.dart';
+import 'package:amigoz/features/setup/viewmodel/setup_state.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

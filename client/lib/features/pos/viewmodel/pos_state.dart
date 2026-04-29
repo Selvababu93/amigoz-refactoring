@@ -1,6 +1,6 @@
-import 'package:client/core/database/app_database.dart';
-import 'package:client/features/pos/model/cart_item.dart';
-import 'package:client/features/pos/model/product.dart';
+import 'package:amigoz/core/database/app_database.dart';
+import 'package:amigoz/features/pos/model/cart_item.dart';
+import 'package:amigoz/features/pos/model/product.dart';
 
 class PosState {
   final List<Product> products;

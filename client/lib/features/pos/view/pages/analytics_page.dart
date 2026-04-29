@@ -1,8 +1,9 @@
-import 'package:client/features/pos/viewmodel/pos_view_model.dart';
+import 'package:amigoz/core/utils/report_filters.dart';
+import 'package:amigoz/features/pos/viewmodel/pos_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum ReportFilter { today, week, month, lastMonth, custom }
+
 
 class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
@@ -35,12 +36,12 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         await vm.loadReport(start, end);
         break;
 
-      case ReportFilter.week:
+      case ReportFilter.thisWeek:
         final start = now.subtract(Duration(days: now.weekday - 1));
         await vm.loadReport(start, now);
         break;
 
-      case ReportFilter.month:
+      case ReportFilter.thisMonth:
         final start = DateTime(now.year, now.month, 1);
         final end = (now.month == 12)
             ? DateTime(now.year + 1, 1, 1)
@@ -96,8 +97,9 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               spacing: 8,
               children: [
                 _chip("Today", ReportFilter.today),
-                _chip("Week", ReportFilter.week),
-                _chip("Month", ReportFilter.month),
+                // _chip("Yesterday", ReportFilter.yesterday),
+                _chip("Week", ReportFilter.thisWeek),
+                _chip("Month", ReportFilter.thisMonth),
                 _chip("Last Month", ReportFilter.lastMonth),
                 ActionChip(
                   label: const Text("Custom"),

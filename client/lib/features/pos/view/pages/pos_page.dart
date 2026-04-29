@@ -1,7 +1,7 @@
-import 'package:client/features/pos/view/pages/barcode_scanner_page.dart';
-import 'package:client/features/pos/view/widgets/cart_bar.dart';
-import 'package:client/features/pos/view/widgets/product_grid.dart';
-import 'package:client/features/pos/viewmodel/pos_view_model.dart';
+import 'package:amigoz/features/pos/view/pages/barcode_scanner_page.dart';
+import 'package:amigoz/features/pos/view/widgets/cart_bar.dart';
+import 'package:amigoz/features/pos/view/widgets/product_grid.dart';
+import 'package:amigoz/features/pos/viewmodel/pos_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

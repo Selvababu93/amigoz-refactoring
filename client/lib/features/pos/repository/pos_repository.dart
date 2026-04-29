@@ -1,10 +1,10 @@
-import 'package:client/core/database/app_database.dart';
-import 'package:client/core/providers/providers.dart';
-import 'package:client/core/utils/date_range.dart';
-import 'package:client/core/utils/report_filters.dart';
-import 'package:client/core/utils/utils.dart';
-import 'package:client/features/pos/model/product.dart';
-import 'package:client/features/pos/model/sales_report.dart';
+import 'package:amigoz/core/database/app_database.dart';
+import 'package:amigoz/core/providers/providers.dart';
+import 'package:amigoz/core/utils/date_range.dart';
+import 'package:amigoz/core/utils/report_filters.dart';
+import 'package:amigoz/core/utils/utils.dart';
+import 'package:amigoz/features/pos/model/product.dart';
+import 'package:amigoz/features/pos/model/sales_report.dart';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -180,10 +180,10 @@ class PosRepository {
         final start = DateRanges.startOfDay(now);
         return (start, start.add(const Duration(days: 1)));
 
-      case ReportFilter.yesterday:
-        final y = now.subtract(const Duration(days: 1));
-        final start = DateRanges.startOfDay(y);
-        return (start, start.add(const Duration(days: 1)));
+      // case ReportFilter.yesterday:
+      //   final y = now.subtract(const Duration(days: 1));
+      //   final start = DateRanges.startOfDay(y);
+      //   return (start, start.add(const Duration(days: 1)));
 
       case ReportFilter.thisWeek:
         final start = DateRanges.startOfWeek(now);

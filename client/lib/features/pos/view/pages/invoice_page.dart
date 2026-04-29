@@ -1,4 +1,4 @@
-import 'package:client/features/pos/model/invoice_model.dart';
+import 'package:amigoz/features/pos/model/invoice_model.dart';
 import 'package:flutter/material.dart';
 
 class InvoicePage extends StatelessWidget {

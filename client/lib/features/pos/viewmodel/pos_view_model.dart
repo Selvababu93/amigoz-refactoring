@@ -1,10 +1,10 @@
-import 'package:client/core/database/app_database.dart';
-import 'package:client/features/pos/model/cart_item.dart';
-import 'package:client/features/pos/model/invoice_item.dart';
-import 'package:client/features/pos/model/invoice_model.dart';
-import 'package:client/features/pos/model/product.dart';
-import 'package:client/features/pos/repository/pos_repository.dart';
-import 'package:client/features/pos/viewmodel/pos_state.dart';
+import 'package:amigoz/core/database/app_database.dart';
+import 'package:amigoz/features/pos/model/cart_item.dart';
+import 'package:amigoz/features/pos/model/invoice_item.dart';
+import 'package:amigoz/features/pos/model/invoice_model.dart';
+import 'package:amigoz/features/pos/model/product.dart';
+import 'package:amigoz/features/pos/repository/pos_repository.dart';
+import 'package:amigoz/features/pos/viewmodel/pos_state.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
